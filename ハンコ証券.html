@@ -1,0 +1,1148 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>ハンコ証券</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Shippori+Mincho+B1:wght@800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: 稟議書に押印して稼ぐ(左) → 市場ボードで株を売買(右)。スマホは1列、900px以上で2列。 */
+:root{
+  --bg:#edf1f6; --surface:#fafbfd; --ink:#16212e; --muted:#5b6a7b;
+  --line:#d3dbe5; --line-soft:#e3e9f0;
+  --up:#cf2230; --down:#1f66c9; --stamp:#cf3a1b;
+  --accent:#16212e; --accent-ink:#fafbfd; --focus:#1f66c9;
+  --ma1:#c27c00; --ma2:#7b4fd0;
+  --paper:#ffffff; --paper-ink:#1d2733; --paper-line:#cfdaea; --bar:#fafbfd;
+  --font-display:'Shippori Mincho B1','Hiragino Mincho ProN','Yu Mincho',serif;
+  --font-body:'Zen Kaku Gothic New','Hiragino Sans','Yu Gothic UI','Yu Gothic',sans-serif;
+  --font-num:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d131a; --surface:#141c26; --ink:#e7edf4; --muted:#93a1b2;
+    --line:#263342; --line-soft:#1d2834;
+    --up:#ff6a72; --down:#6aa8ff;
+    --accent:#e7edf4; --accent-ink:#0d131a; --focus:#6aa8ff;
+    --ma1:#ffc24a; --ma2:#b79cff;
+    --paper:#e8edf3; --paper-line:#c4cfdd; --bar:#141c26;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d131a; --surface:#141c26; --ink:#e7edf4; --muted:#93a1b2;
+  --line:#263342; --line-soft:#1d2834;
+  --up:#ff6a72; --down:#6aa8ff;
+  --accent:#e7edf4; --accent-ink:#0d131a; --focus:#6aa8ff;
+    --ma1:#ffc24a; --ma2:#b79cff;
+  --paper:#e8edf3; --paper-line:#c4cfdd; --bar:#141c26;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--font-body); font-size:15px; line-height:1.55;
+  padding-block:20px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+button{font:inherit;color:inherit}
+h1,h2,h3,p,dl,dd,ol{margin:0}
+
+.wrap{max-width:1120px;margin-inline:auto;display:flex;flex-direction:column;gap:22px}
+
+/* header */
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;flex:none;border:2.5px solid var(--stamp);border-radius:50%;color:var(--stamp);display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:18px;transform:rotate(-8deg)}
+.brand h1{font-family:var(--font-display);font-weight:800;font-size:23px;letter-spacing:.06em;line-height:1.2}
+.brand p{font-size:12.5px;color:var(--muted)}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:26px}
+.left{display:flex;flex-direction:column;gap:26px;min-width:0}
+.right{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (min-width:900px){
+  .layout{grid-template-columns:minmax(320px,380px) minmax(0,1fr);gap:32px;align-items:start}
+}
+
+.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:8px 12px;flex-wrap:nowrap}
+.sectionhead h2{font-size:14px;letter-spacing:.08em}
+.hint{font-size:12px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* summary */
+.label{font-size:12px;color:var(--muted);letter-spacing:.08em}
+.assets{font-family:var(--font-num);font-weight:700;font-size:clamp(32px,9vw,44px);line-height:1.1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rankrow{display:flex;align-items:center;gap:10px;margin-top:12px}
+.rank{font-size:12px;font-weight:700;padding:2px 9px;border:1.5px solid var(--ink);border-radius:4px;white-space:nowrap}
+.track{flex:1;min-width:0;height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--ink);transition:width .25s linear}
+.allow{flex:none;font-family:var(--font-num);font-size:12px;color:var(--muted);white-space:nowrap}
+.nextrank{margin-top:6px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:14px;border-top:1px solid var(--line)}
+.stat{padding:10px 6px 0 12px;min-width:0;border-left:1px solid var(--line)}
+.stat:nth-child(3n+1){padding-left:0;border-left:0}
+
+.stat dt{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.stat dd{font-family:var(--font-num);font-weight:500;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#s-pl{font-weight:700}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:11;display:flex;flex-direction:column;gap:2px;padding:8px 12px 8px;background:var(--bar);border:1px solid var(--line);border-radius:6px}
+.tb-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.tb-top .assets{font-size:clamp(24px,7vw,30px)}
+.tb-grid{margin-top:4px}
+.tb-grid .stat{padding-top:6px}
+
+/* sheet (tap target) */
+.sheet{
+  position:relative;display:block;width:100%;min-height:236px;margin-top:10px;padding:18px 18px 16px;
+  text-align:left;border:1px solid var(--line);border-radius:4px;
+  background:var(--paper);color:var(--paper-ink);box-shadow:4px 4px 0 var(--line);
+  overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none;
+  touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+}
+.sheet::before{content:"";position:absolute;inset:92px 18px 58px;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 27px,var(--paper-line) 27px,var(--paper-line) 28px)}
+.sheet:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--line)}
+.sheet-meta{display:flex;justify-content:space-between;font-size:11.5px;opacity:.7}
+.sheet-title{margin-top:6px;font-family:var(--font-display);font-weight:800;font-size:28px;letter-spacing:.5em;padding-left:.5em;text-align:center;line-height:1.2}
+.sheet-sub{margin-top:2px;font-size:12px;text-align:center;opacity:.75}
+.sheet-foot{position:absolute;left:18px;right:18px;bottom:14px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;font-size:12.5px}
+.pay{font-family:var(--font-num);font-weight:700;font-size:20px;line-height:1}
+.mark{
+  position:absolute;width:54px;height:54px;margin:-27px 0 0 -27px;border:3px solid var(--stamp);border-radius:50%;
+  box-shadow:inset 0 0 0 2px var(--paper),inset 0 0 0 3.5px var(--stamp);
+  color:var(--stamp);display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:19px;line-height:1;
+  writing-mode:vertical-rl;pointer-events:none;mix-blend-mode:multiply;animation:stamp 1s ease-out forwards;
+}
+@keyframes stamp{
+  0%{opacity:0;transform:rotate(var(--rot)) scale(1.7)}
+  10%{opacity:.95;transform:rotate(var(--rot)) scale(1)}
+  65%{opacity:.85;transform:rotate(var(--rot)) scale(1)}
+  100%{opacity:0;transform:rotate(var(--rot)) scale(1)}
+}
+.floater{position:absolute;pointer-events:none;font-family:var(--font-num);font-weight:700;font-size:16px;color:var(--paper-ink);transform:translate(-50%,-100%);animation:rise .8s ease-out forwards}
+@keyframes rise{
+  0%{opacity:0;transform:translate(-50%,-60%)}
+  15%{opacity:1}
+  100%{opacity:0;transform:translate(-50%,-200%)}
+}
+
+.btn{min-height:44px;padding:0 14px;border:1.5px solid var(--ink);border-radius:6px;background:var(--accent);color:var(--accent-ink);font-weight:700;cursor:pointer;touch-action:manipulation;white-space:nowrap}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.btn .n{font-family:var(--font-num)}
+button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.office{margin-top:12px;padding:10px 10px 6px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.office-head{display:flex;justify-content:space-between;gap:8px;min-height:1.4em;font-size:12px;color:var(--muted);white-space:nowrap}
+.office-head span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.floor{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;margin-top:6px}
+.slot{display:block;width:100%;height:auto}
+.slot.empty{opacity:.3}
+.slot .desk{fill:var(--line);stroke:var(--muted);stroke-width:.8}
+.slot .lap{fill:var(--muted)}
+.slot .coin{opacity:0;animation:coin 2.4s ease-out infinite;animation-delay:var(--d,0s)}
+.slot .coin text{fill:var(--stamp);font-family:var(--font-num)}
+.slot .hand{animation:typing .3s ease-in-out infinite alternate;animation-delay:var(--d,0s)}
+.slot .hand.b{animation-delay:calc(var(--d,0s) + .15s)}
+.slot .head{animation:bob 1.6s ease-in-out infinite;animation-delay:var(--d,0s)}
+@keyframes typing{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+@keyframes bob{50%{transform:translateY(-1px)}}
+@keyframes coin{0%{opacity:0;transform:translateY(0)}15%{opacity:1}100%{opacity:0;transform:translateY(-12px)}}
+.stats-line{margin-top:10px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats-line b{font-family:var(--font-num);font-weight:500;color:var(--ink)}
+.ups{display:flex;flex-direction:column;margin-top:8px;border-top:1px solid var(--line)}
+.upg{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.upg>div{min-width:0}
+.upg h3{font-size:14px}
+.upg h3 span{margin-left:6px;font-family:var(--font-num);font-size:12px;font-weight:500;color:var(--muted)}
+.upg p{margin-top:2px;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upg .btn{min-width:116px}
+
+/* market */
+.bar{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hh,0px) - 1px);z-index:9;display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;padding:8px 12px;background:var(--bar);border:1px solid var(--line);border-radius:6px}
+.cash small{display:block;font-size:11px;color:var(--muted);line-height:1.3}
+.cash b{font-family:var(--font-num);font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip{display:flex;align-items:center;gap:5px;min-height:40px;padding:0 10px;border:1.5px solid var(--line);border-radius:6px;background:transparent;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;touch-action:manipulation}
+.chip[aria-pressed="true"]{border-color:var(--ink)}
+.chip[aria-pressed="false"] .sw{opacity:.3}
+.sw{display:block;width:14px;height:3px;border-radius:2px}
+.sw.s1{background:var(--ma1)}
+.sw.s2{background:var(--ma2)}
+.qty{display:flex;align-items:center;gap:8px;margin-left:auto}
+.qty>span{font-size:11.5px;color:var(--muted)}
+.seg{display:flex;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden}
+.seg button{min-height:40px;min-width:40px;padding:0 8px;border:0;background:transparent;font-family:var(--font-num);font-weight:700;cursor:pointer;touch-action:manipulation}
+.seg button+button{border-left:1.5px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible{outline-offset:-3px}
+
+.news{padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.news h2{margin-bottom:6px;font-size:12px;letter-spacing:.08em;color:var(--muted)}
+.news ol{list-style:none;padding:0;display:flex;flex-direction:column;gap:5px;min-height:146px}
+.news li{display:grid;grid-template-columns:auto 2.6em minmax(0,1fr);gap:8px;align-items:baseline;font-size:13px}
+.news time{font-family:var(--font-num);font-size:11.5px;color:var(--muted)}
+.tag{font-size:11.5px;font-weight:700}
+.txt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pos{color:var(--up)}
+.neg{color:var(--down)}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.stock{display:flex;flex-direction:column;gap:10px;min-width:0;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.stock.flash{animation:flash .5s ease-out}
+.stock.lim-up{border-color:var(--up);box-shadow:0 0 0 1px var(--up)}
+.stock.lim-dn{border-color:var(--down);box-shadow:0 0 0 1px var(--down)}
+@keyframes flash{0%{background:var(--line)}100%{background:var(--surface)}}
+.shead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.shead>div:first-child{min-width:0}
+.shead h3{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{margin-top:1px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta .code{font-family:var(--font-num)}
+.pxcol{text-align:right;flex:none;white-space:nowrap}
+.price{font-family:var(--font-num);font-weight:700;font-size:22px;line-height:1.15;font-variant-numeric:tabular-nums}
+.chg{font-family:var(--font-num);font-size:12.5px;font-weight:500}
+.spark{display:block;width:100%;height:auto;background:var(--bg);border-radius:4px}
+.spark .grid{stroke:var(--line);stroke-width:.6;opacity:.7}
+.spark .w{stroke-width:.7}
+.spark rect{stroke-width:.5}
+.spark .up{stroke:var(--up);fill:var(--up)}
+.spark .dn{stroke:var(--down);fill:var(--down)}
+.spark .ma1,.spark .ma2{fill:none;stroke-width:.8;stroke-linejoin:round;stroke-linecap:round}
+.spark .ma1{stroke:var(--ma1)}
+.spark .ma2{stroke:var(--ma2)}
+.spark .last{stroke:var(--muted);stroke-dasharray:3 3;stroke-width:1}
+.holdings{display:flex;flex-direction:column;gap:8px;min-width:0}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.hold-table{width:100%;min-width:500px;border-collapse:collapse;font-size:13px}
+.hold-table th{padding:8px 10px;text-align:right;font-size:11.5px;font-weight:500;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
+.hold-table td{height:34px;padding:0 10px;text-align:right;font-family:var(--font-num);font-variant-numeric:tabular-nums;white-space:nowrap;border-bottom:1px solid var(--line-soft)}
+.hold-table th:first-child,.hold-table td:first-child{text-align:left;font-family:var(--font-body);font-weight:700}
+.hold-table tr.idle td{opacity:.4}
+.hold-table tr.sum td{font-weight:700;border-top:1.5px solid var(--ink);border-bottom:0}
+.kindrow{display:flex;align-items:center;gap:6px;margin-bottom:-4px;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden}
+.kindrow b{flex:none;padding:1px 6px;border:1px solid var(--line);border-radius:3px;color:var(--ink);font-size:11px}
+.kindrow span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.divstats{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0;border-top:0;padding:0 12px 8px}
+.divlog{list-style:none;margin:0;padding:0 12px 4px;min-height:160px;border-top:1px solid var(--line-soft)}
+.divlog li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:baseline;height:31px;line-height:30px;font-size:13px;border-bottom:1px solid var(--line-soft)}
+.divlog time{font-family:var(--font-num);font-size:11.5px;color:var(--muted)}
+.divlog .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.divlog .amt{font-family:var(--font-num);font-weight:700;color:var(--up);white-space:nowrap}
+.divlog li.empty{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.perks{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:8px}
+.perk{position:relative;overflow:hidden;display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 12px;align-items:center;padding:10px 12px 13px;background:var(--surface);border:1px solid var(--line);border-radius:6px;min-width:0}
+.perk .badge{grid-row:1 / 4;width:42px;height:42px;border:2.5px solid var(--muted);border-radius:50%;color:var(--muted);display:grid;place-items:center;font-family:var(--font-display);font-weight:800;font-size:19px;line-height:1;transform:rotate(-8deg);opacity:.55}
+.perk.on{border-color:var(--ink)}
+.perk.on .badge{border-color:var(--stamp);color:var(--stamp);opacity:1}
+.perk .pn{display:flex;justify-content:space-between;align-items:center;gap:8px;min-width:0;font-weight:700;font-size:13.5px}
+.perk .pn span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.perk .st{flex:none;padding:1px 6px;border:1px solid var(--line);border-radius:3px;color:var(--muted);font-size:11px;font-weight:700;white-space:nowrap}
+.perk.on .st{background:var(--ink);border-color:var(--ink);color:var(--accent-ink)}
+.perk .pe{min-height:2.9em;font-size:12px;line-height:1.45;color:var(--muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.perk .pt{font-family:var(--font-num);font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.perk .pbar{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line)}
+.perk .pfill{height:100%;width:0;background:var(--muted)}
+.perk.on .pfill{background:var(--stamp)}
+.chartmeta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:-4px;font-size:11px;color:var(--muted);white-space:nowrap}
+.chartmeta .tf{font-family:var(--font-num);font-weight:700;color:var(--ink)}
+.legend{display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden}
+.legend .sw{width:10px;flex:none}
+.legend .sw+.sw{margin-left:0}
+.noma .legend{visibility:hidden}
+.range{display:flex;justify-content:space-between;gap:8px;margin-top:-4px;font-family:var(--font-num);font-size:11.5px;color:var(--muted);white-space:nowrap}
+.hold{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 8px}
+.hold>div{display:flex;flex-direction:column;min-width:0}
+.hold .pl{grid-column:1 / -1;flex-direction:row;justify-content:space-between;align-items:baseline;gap:8px}
+.hold dt{font-size:11px;color:var(--muted);white-space:nowrap}
+.hold dd{margin-top:1px;font-family:var(--font-num);font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hold .pl dd{margin-top:0}
+.divrow{display:flex;flex-direction:column;gap:5px;font-size:12.5px}
+.divline{display:flex;justify-content:space-between;gap:8px;color:var(--muted);white-space:nowrap}
+.divline span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.divline b{flex:none;font-family:var(--font-num);font-weight:500;color:var(--ink)}
+.divtrack{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.divfill{height:100%;width:0;background:var(--ink);transition:width .25s linear}
+.act{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 16px;font-size:12px;color:var(--muted)}
+.linkbtn{padding:6px 0;border:0;background:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:12px}
+
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:20;max-width:calc(100% - 32px);padding:10px 16px;border-radius:6px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14px;opacity:0;transform:translate(-50%,8px);transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  .mark{animation:fadeonly .8s linear forwards;transform:rotate(var(--rot))}
+  .floater{animation:fadeonly .8s linear forwards}
+  .stock.flash{animation:none}
+  .slot .hand,.slot .head,.slot .coin{animation:none}
+  .fill,.divfill,.toast{transition:none}
+  @keyframes fadeonly{0%{opacity:1}100%{opacity:0}}
+}
+</style>
+
+<div class="wrap">
+  <header class="brand">
+    <div class="logo" aria-hidden="true">証</div>
+    <div>
+      <h1>ハンコ証券</h1>
+      <p>稟議書に押印して稼ぎ、株で増やす。</p>
+    </div>
+  </header>
+  <div class="topbar" id="topbar" role="region" aria-label="資産の概要">
+    <div class="tb-top"><span class="label">総資産</span><span class="assets" id="assets">¥0</span></div>
+    <dl class="stats tb-grid">
+      <div class="stat"><dt>現金</dt><dd id="s-cash">¥0</dd></div>
+      <div class="stat"><dt>株式評価額</dt><dd id="s-stock">¥0</dd></div>
+      <div class="stat"><dt>含み損益</dt><dd id="s-unreal">¥0</dd></div>
+    </dl>
+  </div>
+
+  <div class="layout">
+    <div class="left">
+      <section aria-label="資産">
+        <div class="rankrow">
+          <span class="rank" id="rank">新入社員</span>
+          <div class="track" role="progressbar" aria-label="次の肩書きまでの進み具合" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="rankbar"><div class="fill" id="rankfill"></div></div>
+          <span class="allow" id="allow" title="役職手当は労働収入にかかる倍率です。昇進で上がり、降格はありません">手当 ×1.00</span>
+        </div>
+        <p class="nextrank" id="nextrank"></p>
+        <dl class="stats">
+          <div class="stat"><dt>配当の累計</dt><dd id="s-div">¥0</dd></div>
+          <div class="stat"><dt>売却損益</dt><dd id="s-real">¥0</dd></div>
+          <div class="stat"><dt>損益合計</dt><dd id="s-pl">¥0</dd></div>
+        </dl>
+      </section>
+
+      <section aria-labelledby="h-work">
+        <div class="sectionhead">
+          <h2 id="h-work">お仕事</h2>
+          <span class="hint" id="rate"></span>
+        </div>
+        <button type="button" class="sheet" id="sheet" aria-label="稟議書に押印して働く">
+          <div class="sheet-meta"><span id="sheet-who">起案者　あなた</span><span id="sheet-no">第1号</span></div>
+          <div class="sheet-title">稟議書</div>
+          <div class="sheet-sub">株式購入の元手を確保する件</div>
+          <div class="sheet-foot"><span>タップして押印</span><span class="pay" id="pay">+¥10</span></div>
+        </button>
+        <p class="stats-line">押印 <b id="taps">0</b>回 ・ 労働収入 <b id="earned">¥0</b></p>
+        <div class="ups">
+          <div class="upg">
+            <div><h3>作業効率化<span id="tap-lv">Lv.0</span></h3><p id="tap-desc"></p></div>
+            <button type="button" class="btn" id="tap-buy">強化 <span class="n" id="tap-cost"></span></button>
+          </div>
+          <div class="upg">
+            <div><h3>アルバイトを雇う<span id="part-lv">Lv.0</span></h3><p id="part-desc"></p></div>
+            <button type="button" class="btn" id="part-buy">雇う <span class="n" id="part-cost"></span></button>
+          </div>
+          <div class="upg">
+            <div><h3>正社員に登用<span id="full-lv">0人</span></h3><p id="full-desc"></p></div>
+            <button type="button" class="btn" id="full-buy">登用 <span class="n" id="full-cost"></span></button>
+          </div>
+        </div>
+        <div class="office" aria-label="アルバイトの様子">
+          <div class="office-head"><span id="office-n">アルバイト 0人</span><span id="office-x"></span></div>
+          <div class="floor" id="floor" aria-hidden="true"></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="right" aria-labelledby="h-market">
+      <div class="sectionhead">
+        <h2 id="h-market">市場ボード</h2>
+        
+      </div>
+      <div class="bar">
+        
+        <div class="seg" id="tfseg" role="group" aria-label="チャートの期間"><button type="button" data-tf="0" aria-pressed="true">短期</button><button type="button" data-tf="1" aria-pressed="false">中期</button><button type="button" data-tf="2" aria-pressed="false">長期</button></div>
+        <button type="button" class="chip" id="ma-toggle" aria-pressed="true" title="5本と20本の単純移動平均（足の種類に合わせて期間が変わります）"><span class="sw s1"></span><span class="sw s2"></span>移動平均線</button>
+        <div class="qty">
+          
+          <div class="seg" role="group" aria-label="売買する株数">
+            <button type="button" data-q="1" aria-pressed="true">×1</button>
+            <button type="button" data-q="10" aria-pressed="false">×10</button>
+            <button type="button" data-q="100" aria-pressed="false">×100</button>
+            <button type="button" data-q="max" aria-pressed="false">最大</button>
+          </div>
+        </div>
+      </div>
+      <div class="news">
+        <h2>ニュース速報</h2>
+        <ol id="news"></ol>
+      </div>
+      <section class="holdings" aria-labelledby="h-hold">
+        <div class="sectionhead"><h2 id="h-hold">保有株式</h2><span class="hint">取得額は買値の合計</span></div>
+        <div class="tablewrap">
+          <table class="hold-table">
+            <thead><tr><th>銘柄</th><th>株数</th><th>取得額</th><th>評価額</th><th>含み損益</th><th>損益率</th></tr></thead>
+            <tbody id="holdbody"></tbody>
+          </table>
+        </div>
+      </section>
+      <section class="holdings" aria-labelledby="h-div">
+        <div class="sectionhead"><h2 id="h-div">配当収入</h2><span class="hint">配当日ごとに現金へ入ります</span></div>
+        <div class="tablewrap">
+          <dl class="stats divstats">
+            <div class="stat"><dt>配当の累計</dt><dd id="d-total">¥0</dd></div>
+            <div class="stat"><dt>次回分の見込み</dt><dd id="d-next">¥0</dd></div>
+          </dl>
+          <ol class="divlog" id="divlog"></ol>
+        </div>
+      </section>
+      <section class="holdings" aria-labelledby="h-perk">
+        <div class="sectionhead"><h2 id="h-perk">株主優待</h2><span class="hint">一定の株数を持つ間、効果が有効</span></div>
+        <div class="perks" id="perks"></div>
+      </section>
+      <div class="cards" id="cards"></div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <span>赤が上昇、青が下落（日本式）。企業名・株価・ニュースはすべて架空です。進行状況はこのブラウザに自動保存されます。</span>
+    <button type="button" class="linkbtn" id="reset">最初からやり直す</button>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='hanko-securities-v1';
+var nf=new Intl.NumberFormat('ja-JP');
+
+/* 銘柄。dps=1株あたり配当(円・固定)、every=配当の間隔(秒)、vol=1秒あたりの値動き、drift=1秒あたりの本来価値の伸び */
+var DEFS=[
+  {id:'hinode',name:'日ノ出電力',sector:'電力・ガス',code:'301A',p0:180,dps:1.4,every:30,vol:.005,drift:.00003,def:1,oil:-.3,beta:.5,
+   good:['電力需要の増加で業績を上方修正','原発再稼働の見通しで買いが優勢'],bad:['燃料価格の高騰でコストが増加','発電所のトラブルで供給に懸念']},
+  {id:'towa',name:'東和電鉄',sector:'鉄道',code:'902B',p0:420,dps:3.8,every:40,vol:.008,drift:.00004,def:1,oil:-.15,beta:.7,
+   good:['訪日客の増加で運賃収入が好調','駅ビル事業が最高益を更新'],bad:['大規模な運転見合わせが発生','人件費の上昇で減益の見通し']},
+  {id:'minato',name:'ミナト製菓',sector:'食品',code:'221C',p0:95,dps:.9,every:50,vol:.009,drift:.00008,def:1,beta:.8,
+   good:['新作チョコが大ヒット','海外販売が好調で増収'],bad:['原材料費の値上げで利益を圧迫','商品の自主回収を発表']},
+  {id:'hokuto',name:'北斗銀行',sector:'銀行',code:'840D',p0:260,dps:5.2,every:30,vol:.016,drift:-.0002,beta:1,
+   good:['貸出金利の上昇で利ざやが拡大','自社株買いを発表'],bad:['不良債権の増加が判明','システム障害で信頼が低下']},
+  {id:'aoba',name:'あおば損害保険',sector:'損害保険',code:'871G',p0:330,dps:3.3,every:35,vol:.007,drift:.00005,beta:.7,
+   good:['保険料の値上げが浸透し、利益が拡大','保有株の含み益で最高益を更新'],bad:['巨大台風で保険金の支払いが急増','大地震の発生で支払い負担が重くなる懸念']},
+  {id:'taiyo',name:'大洋資源開発',sector:'石油・天然ガス',code:'160H',p0:150,dps:3,every:45,vol:.018,drift:0,beta:.9,oil:1,
+   good:['海外ガス田の権益を新たに取得','LNG事業が好調で増益'],bad:['生産設備のトラブルで出荷が停止','開発プロジェクトの遅れを発表']},
+  {id:'nanasei',name:'七星商事',sector:'卸売業（総合商社）',code:'800K',p0:280,dps:5,every:40,vol:.011,drift:.00004,beta:1,oil:.5,
+   good:['資源価格の上昇で決算が上振れ','自社株買いと増配を同時に発表'],bad:['海外の投資案件で減損損失を計上','資源権益の評価損を計上']},
+  {id:'next',name:'ネクストロジック',sector:'情報・通信',code:'403E',p0:640,dps:0,every:30,vol:.024,drift:.0005,beta:1.3,
+   good:['生成AI事業が急拡大','大手企業とクラウド契約を締結'],bad:['サイバー攻撃で情報流出の疑い','主力製品の販売が鈍化']},
+  {id:'sora',name:'ソラノ宇宙',sector:'航空宇宙',code:'702F',p0:45,dps:0,every:30,vol:.034,drift:.0006,beta:1.6,
+   good:['ロケットの打ち上げに成功','月面探査の受注を獲得'],bad:['打ち上げの延期を発表','試験機が爆発、原因を調査中']}
+];
+var MKT=[
+  {x:'日銀が金融緩和の継続を決定、市場に安心感',m:.025},
+  {x:'米国株の急落を受け、東京市場も全面安',m:-.04},
+  {x:'円安が進み、輸出関連に買い',m:.03},
+  {x:'景気指標が市場予想を下回る',m:-.025},
+  {x:'政府が追加の経済対策を発表',m:.035},
+  {x:'地政学リスクの高まりでリスク回避の売り',m:-.035}
+];
+var DIV={hinode:[.25,.02],towa:[.25,.02],minato:[.22,.03],hokuto:[.18,.04],aoba:[.22,.03],taiyo:[.2,.05],nanasei:[.22,.03]};
+var PERK={
+  hinode:{need:100,badge:'電',name:'省エネ電気代クーポン',desc:'雇用費 −15%（アルバイト・正社員）'},
+  towa:{need:50,badge:'鉄',name:'全線フリー乗車証',desc:'押印1回の収入 +20%'},
+  minato:{need:200,badge:'菓',name:'お菓子の詰め合わせ',desc:'アルバイトの稼ぎ +15%'},
+  hokuto:{need:100,badge:'金',name:'金利優遇定期預金',desc:'現金に毎秒0.02%の利息（上限 毎秒¥200）'},
+  aoba:{need:50,badge:'保',name:'補償パック',desc:'悪材料ニュースによる下落を30%軽減'},
+  taiyo:{need:100,badge:'油',name:'資源ボーナス配当券',desc:'全銘柄の配当 +10%'},
+  next:{need:20,badge:'雲',name:'クラウド自動化ツール',desc:'自動収入（アルバイト・正社員）+20%'},
+  nanasei:{need:50,badge:'商',name:'商社マン人脈名刺',desc:'押印・自動収入ともに +10%'},
+  sora:{need:300,badge:'宙',name:'宇宙旅行 抽選券',desc:'40秒ごとに抽選。当選で総資産の1.5%'}
+};
+var KIND={
+  hinode:['ディフェンシブ','値動き小・長期は上昇傾向'],towa:['ディフェンシブ','値動き小・長期は上昇傾向'],minato:['ディフェンシブ','値動き小・長期は上昇傾向'],
+  hokuto:['景気敏感','市況の影響大'],aoba:['配当重視','増配が多い・災害に弱い'],taiyo:['資源・高配当','原油価格で大きく動く'],nanasei:['総合商社','資源と非資源に分散・増配が多め'],next:['グロース','値動き大・成長期待'],sora:['グロース','値動き大・一発逆転']
+};
+var RANKS=[
+  {at:0,name:'新入社員',mult:1},{at:3000,name:'主任',mult:1.1},{at:10000,name:'係長',mult:1.2},
+  {at:30000,name:'課長',mult:1.35},{at:100000,name:'次長',mult:1.5},{at:300000,name:'部長',mult:1.75},
+  {at:1000000,name:'取締役',mult:2},{at:3000000,name:'常務取締役',mult:2.3},
+  {at:10000000,name:'代表取締役社長',mult:2.7},{at:30000000,name:'大口投資家',mult:3},{at:100000000,name:'億り人',mult:3.5}
+];
+
+var S=null, R={}, lotT=40, divDirty=true, lastOffice=-1, qtyMode=1, dirty=true, evT=20, acc=0, last=Date.now(), toastT=0;
+var $=function(id){return document.getElementById(id);};
+
+function num(x,d){return typeof x==='number'&&isFinite(x)?x:d;}
+function clamp(x,a,b){return Math.min(b,Math.max(a,x));}
+function gauss(){var u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function px(p){return p>=1000?Math.round(p):Math.round(p*10)/10;}
+function fmtPx(p){p=px(p);return p>=1000?nf.format(p):p.toFixed(1);}
+function big(n){n=Math.floor(n+1e-6);if(n>=1e12)return (n/1e12).toFixed(2)+'兆';if(n>=1e8)return (n/1e8).toFixed(2)+'億';if(n>=1e6)return nf.format(Math.floor(n/1e4))+'万';return nf.format(n);}
+function money(n){return n>=100?big(n):(Math.round(n*10)/10).toFixed(1);}
+function signed(n){var a=Math.abs(n);return (n<0?'−':'+')+'¥'+money(a);}
+function perkOn(id){var q=S.stocks[id];return !!q&&q.shares>=PERK[id].need;}
+function mult(){return RANKS[S.rank].mult;}
+function tapPowerAt(l){return Math.round((10+8*l)*mult()*(perkOn('towa')?1.2:1)*(perkOn('nanasei')?1.1:1));}
+function tapPower(){return tapPowerAt(S.tapLv);}
+function tapCost(){return Math.round(100*Math.pow(1.55,S.tapLv));}
+function rateAt(p,f){return (6*p*(perkOn('minato')?1.15:1)+40*f)*(perkOn('next')?1.2:1)*(perkOn('nanasei')?1.1:1)*mult();}
+function partRate(){return rateAt(S.partLv,S.fullLv);}
+function partCost(){return Math.round(300*Math.pow(1.6,S.partLv+S.fullLv)*(perkOn('hinode')?.85:1));}
+function fullCost(){return Math.round(1500*Math.pow(1.7,S.fullLv)*(perkOn('hinode')?.85:1));}
+function rankOf(a){var i=0;for(var j=0;j<RANKS.length;j++){if(a>=RANKS[j].at)i=j;}return i;}
+
+var CMAX=40;
+var TF=[{per:4,name:'4秒足'},{per:20,name:'20秒足'},{per:120,name:'2分足'}];
+function okc(c){return !!c&&typeof c.o==='number'&&typeof c.h==='number'&&typeof c.l==='number'&&typeof c.c==='number'&&isFinite(c.o+c.h+c.l+c.c);}
+function cp(c){return {o:c.o,h:c.h,l:c.l,c:c.c};}
+function newSer(p){return {candles:[],cur:{o:p,h:p,l:p,c:p,n:0}};}
+function feed(s){
+  var p=s.price;
+  s.ser.forEach(function(r){var c=r.cur;c.c=p;if(p>c.h)c.h=p;if(p<c.l)c.l=p;});
+}
+function closeCandle(s){
+  s.ser.forEach(function(r,i){
+    var c=r.cur;c.n++;
+    if(c.n>=TF[i].per){
+      r.candles.push(cp(c));
+      if(r.candles.length>CMAX)r.candles.shift();
+      r.cur={o:c.c,h:c.c,l:c.c,c:c.c,n:0};
+    }
+  });
+}
+function scaleSer(r,k){
+  r.candles=r.candles.map(function(c){return {o:c.o*k,h:c.h*k,l:c.l*k,c:c.c*k};});
+  r.cur={o:r.cur.o*k,h:r.cur.h*k,l:r.cur.l*k,c:r.cur.c*k,n:r.cur.n};
+}
+function loadSer(o,per,price){
+  if(!o||!Array.isArray(o.candles))return null;
+  var cs=o.candles.filter(okc);
+  if(cs.length<2)return null;
+  var cur=okc(o.cur)?{o:o.cur.o,h:o.cur.h,l:o.cur.l,c:o.cur.c,n:clamp(Math.floor(num(o.cur.n,0)),0,per-1)}:{o:price,h:price,l:price,c:price,n:0};
+  return {candles:cs.slice(-CMAX).map(cp),cur:cur};
+}
+function stepStock(s,d,m,drift){
+  s.fair=clamp(s.fair*Math.exp(drift+gauss()*d.vol*.3),d.p0*.25,d.p0*15);
+  var r=.03*Math.log(s.fair/s.price)+gauss()*d.vol+d.beta*m;
+  s.price=clamp(s.price*Math.exp(r),d.p0*.1,d.p0*40);
+  feed(s);
+}
+function freshStock(d){
+  var s={shares:0,cost:0,divEarned:0,dps:d.dps,ann:false,price:d.p0,fair:d.p0,ser:[newSer(d.p0),newSer(d.p0),newSer(d.p0)],divT:d.every*(.5+Math.random()*.5)};
+  var steps=TF[2].per*(CMAX-4);
+  for(var i=0;i<steps;i++){stepStock(s,d,gauss()*.003,0);closeCandle(s);}
+  var k=d.p0/s.price;
+  s.price=d.p0;s.fair=clamp(s.fair*k,d.p0*.25,d.p0*15);
+  s.ser.forEach(function(r){scaleSer(r,k);});
+  return s;
+}
+
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(!raw)return null;
+    var o=JSON.parse(raw);
+    return (o&&typeof o.cash==='number')?o:null;
+  }catch(e){return null;}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+function initState(fresh){
+  var o=fresh?null:load();
+  S={cash:200,earned:0,taps:0,tapLv:0,partLv:0,fullLv:0,divTotal:0,realized:0,showMA:true,tf:0,divLog:[],rank:0,stocks:{},news:[]};
+  if(o){
+    S.cash=num(o.cash,200);S.earned=num(o.earned,0);S.taps=num(o.taps,0);
+    S.tapLv=Math.max(0,Math.floor(num(o.tapLv,0)));S.partLv=Math.max(0,Math.floor(num(o.partLv,0)));
+    S.divTotal=num(o.divTotal,0);S.realized=num(o.realized,0);S.showMA=o.showMA!==false;S.tf=clamp(Math.floor(num(o.tf,0)),0,2);
+    if(Array.isArray(o.divLog))S.divLog=o.divLog.filter(function(e){return e&&typeof e.n==='string'&&isFinite(e.amt)&&isFinite(e.sh)&&isFinite(e.dps);}).slice(0,5).map(function(e){return {t:String(e.t||''),n:e.n,sh:e.sh,dps:e.dps,amt:e.amt};});S.fullLv=Math.max(0,Math.floor(num(o.fullLv,0)));
+    if(Array.isArray(o.news)){
+      S.news=o.news.filter(function(n){return n&&typeof n.x==='string';}).slice(0,6).map(function(n){return {t:String(n.t||''),k:String(n.k||'mkt'),x:n.x};});
+    }
+  }
+  DEFS.forEach(function(d){
+    var s=freshStock(d);
+    var sv=o&&o.stocks&&o.stocks[d.id];
+    if(sv){
+      s.shares=Math.max(0,Math.floor(num(sv.shares,0)));
+      s.cost=s.shares?Math.max(0,num(sv.cost,0)):0;
+      s.divEarned=num(sv.divEarned,0);
+      var fp=s.price;s.price=clamp(num(sv.price,d.p0),d.p0*.1,d.p0*40);
+      s.fair=clamp(num(sv.fair,s.price),d.p0*.25,d.p0*15);
+      s.divT=clamp(num(sv.divT,d.every),0,d.every);
+      s.dps=Math.max(0,num(sv.dps,d.dps));s.ann=!!sv.ann;
+      if(sv.lock&&(sv.lock.dir===1||sv.lock.dir===-1)&&isFinite(sv.lock.px)&&num(sv.lock.t,0)>0){s.lock={dir:sv.lock.dir,t:Math.min(30,Math.floor(sv.lock.t)),px:sv.lock.px};s.price=s.lock.px;}
+      var kk=s.price/fp;
+      s.ser.forEach(function(r){scaleSer(r,kk);});
+      var cand=Array.isArray(sv.ser)?sv.ser:[{candles:sv.candles,cur:sv.cur}];
+      cand.slice(0,3).forEach(function(o,i){var r=loadSer(o,TF[i].per,s.price);if(r)s.ser[i]=r;});
+    }
+    S.stocks[d.id]=s;
+  });
+  S.rank=Math.max(rankOf(totals().assets),Math.min(RANKS.length-1,Math.max(0,Math.floor(num(o&&o.rank,0)))));
+  divDirty=true;
+  if(!S.news.length)addNews('mkt','【市況】取引を開始。まずは押印で元手を稼ごう');
+  dirty=true;
+}
+
+function totals(){
+  var v=0,c=0;
+  DEFS.forEach(function(d){var s=S.stocks[d.id];v+=s.shares*px(s.price);c+=s.cost;});
+  var u=v-c;
+  return {stock:v,assets:S.cash+v,unreal:u,pl:u+S.realized+S.divTotal};
+}
+function setPL(id,v){var e=$(id);e.textContent=signed(v);e.className=Math.abs(v)<.05?'':(v>0?'pos':'neg');}
+
+function addNews(k,x){
+  var t=new Date().toLocaleTimeString('ja-JP',{hour12:false});
+  S.news.unshift({t:t,k:k,x:x});
+  if(S.news.length>6)S.news.length=6;
+  if(R.newsEl)renderNews();
+}
+function renderNews(){
+  R.newsEl.innerHTML=S.news.map(function(n){
+    var cls=n.k==='up'?'pos':n.k==='down'?'neg':'';
+    var g=n.k==='up'?'▲':n.k==='down'?'▼':n.k==='div'?'配当':'市況';
+    return '<li title="'+esc(n.x)+'"><time>'+esc(n.t)+'</time><span class="tag '+cls+'">'+g+'</span><span class="txt">'+esc(n.x)+'</span></li>';
+  }).join('');
+}
+function toast(t){
+  var el=$('toast');el.textContent=t;el.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(function(){el.classList.remove('show');},2800);
+}
+function flash(id){
+  var c=R.cards[id].card;c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash');
+}
+
+/* 時間の進行 */
+function tick(){
+  var m=gauss()*.003;
+  DEFS.forEach(function(d){
+    var s=S.stocks[d.id];
+    if(s.lock){
+      s.price=s.lock.px;feed(s);closeCandle(s);
+      s.lock.t--;
+      if(s.lock.t<=0){
+        var dr=s.lock.dir;s.lock=null;
+        addNews(dr>0?'up':'down','【'+d.name+'】'+(dr>0?'ストップ高':'ストップ安')+'が解除');
+      }
+      return;
+    }
+    stepStock(s,d,m,d.drift);closeCandle(s);
+  });
+  dirty=true;
+}
+function logDiv(d,s,amt){
+  var t=new Date().toLocaleTimeString('ja-JP',{hour12:false});
+  S.divLog.unshift({t:t,n:d.name,sh:s.shares,dps:s.dps,amt:amt});
+  if(S.divLog.length>5)S.divLog.length=5;
+  divDirty=true;
+}
+function announce(d,s){
+  var old=s.dps,k=Math.random(),dv=DIV[d.id]||[0,0],n=old,kind=null,msg='',f=1;
+  if(old>0){
+    if(k<dv[0]){
+      n=Math.round(old*(1.04+Math.random()*.06)*100)/100;
+      if(n<=old)n=Math.round((old+.01)*100)/100;
+      kind='up';f=1.02+Math.random()*.02;
+      msg='増配を発表：¥'+old.toFixed(2)+' → ¥'+n.toFixed(2)+'（+'+((n/old-1)*100).toFixed(1)+'%）';
+    }else if(k<dv[0]+dv[1]){
+      n=Math.round(old*(.7+Math.random()*.2)*100)/100;
+      if(n>=old)n=Math.round((old-.01)*100)/100;
+      if(n<.3)n=0;
+      kind='down';f=1-(.05+Math.random()*.03);
+      msg=n>0?'減配を発表：¥'+old.toFixed(2)+' → ¥'+n.toFixed(2)+'（−'+((1-n/old)*100).toFixed(1)+'%）':'無配転落を発表（配当を停止）';
+    }
+  }else if(s.price>=d.p0*1.8&&k<.3){
+    n=Math.max(.1,Math.round(s.price*.004*100)/100);
+    kind='up';f=1.04;
+    msg='初の配当を発表：¥'+n.toFixed(2)+'/株';
+  }
+  if(!kind)return;
+  s.dps=n;
+  if(!s.lock)s.price=clamp(s.price*f,d.p0*.1,d.p0*40);
+  s.fair=clamp(s.fair*f,d.p0*.25,d.p0*15);
+  feed(s);dirty=true;
+  addNews(kind,'【'+d.name+'】'+msg);
+  if(s.shares>0)toast(d.name+'：'+(kind==='up'?(old>0?'増配':'初配'):(n>0?'減配':'無配転落')));
+  flash(d.id);
+}
+function dividends(dt){
+  DEFS.forEach(function(d){
+    var s=S.stocks[d.id];
+    s.divT-=dt;
+    if(!s.ann&&s.divT<=10&&s.divT>0){s.ann=true;announce(d,s);}
+    while(s.divT<=0){
+      s.divT+=d.every;s.ann=false;
+      if(s.dps>0&&s.shares>0){
+        var amt=s.shares*s.dps*(perkOn('taiyo')?1.1:1);
+        S.cash+=amt;S.divTotal+=amt;s.divEarned+=amt;
+        logDiv(d,s,amt);
+        flash(d.id);
+      }
+    }
+  });
+}
+function limitEvent(d,s){
+  var up=Math.random()<(d.def?.6:.5),dir=up?1:-1;
+  var px0=clamp(s.price*(1+dir*.2),d.p0*.1,d.p0*40);
+  s.fair=clamp(s.fair*(1+dir*.15),d.p0*.25,d.p0*15);
+  s.price=px0;
+  s.lock={dir:dir,t:12+Math.floor(Math.random()*14),px:px0};
+  feed(s);dirty=true;
+  addNews(up?'up':'down','【'+d.name+'】'+(up?'ストップ高！好材料で買い注文が殺到':'ストップ安！悪材料で売り注文が殺到'));
+  if(s.shares>0)toast(d.name+'：'+(up?'ストップ高':'ストップ安'));
+  flash(d.id);
+}
+var OIL=[
+  {x:'原油価格が急騰、資源関連株に買い',m:.06},{x:'中東情勢の緊迫で原油が上昇',m:.045},
+  {x:'原油価格が急落、資源関連株に売り',m:-.065},{x:'世界の需要減速懸念で原油安',m:-.05}
+];
+function oilEvent(){
+  var e=OIL[Math.floor(Math.random()*OIL.length)];
+  DEFS.forEach(function(d){
+    if(!d.oil)return;
+    var s=S.stocks[d.id],f=1+e.m*d.oil;
+    if(!s.lock)s.price=clamp(s.price*f,d.p0*.1,d.p0*40);
+    s.fair=clamp(s.fair*f,d.p0*.25,d.p0*15);feed(s);
+  });
+  addNews(e.m>0?'up':'down','【市況】'+e.x);
+  dirty=true;
+}
+function fireEvent(){
+  if(Math.random()<.3){
+    if(Math.random()<.35){oilEvent();return;}
+    var e=MKT[Math.floor(Math.random()*MKT.length)];
+    DEFS.forEach(function(d){
+      var s=S.stocks[d.id],f=1+e.m*d.beta;
+      if(!s.lock)s.price=clamp(s.price*f,d.p0*.1,d.p0*40);
+      s.fair=clamp(s.fair*f,d.p0*.25,d.p0*15);feed(s);
+    });
+    addNews(e.m>0?'up':'down','【市況】'+e.x);
+  }else{
+    var d=DEFS[Math.floor(Math.random()*DEFS.length)],s=S.stocks[d.id];
+    if(s.lock)return;
+    if(Math.random()<.12){limitEvent(d,s);return;}
+    var good=Math.random()<(d.def?.56:.52);
+    var mag=(.06+Math.random()*.09)*(.6+d.vol*20);
+    if(d.def&&!good)mag*=.8;
+    var j=good?mag:-mag;
+    if(!good&&perkOn('aoba'))j*=.7;
+    s.price=clamp(s.price*(1+j*.75),d.p0*.1,d.p0*40);
+    s.fair=clamp(s.fair*(1+j),d.p0*.25,d.p0*15);feed(s);
+    var list=good?d.good:d.bad;
+    addNews(good?'up':'down','【'+d.name+'】'+list[Math.floor(Math.random()*list.length)]);
+    flash(d.id);
+  }
+  dirty=true;
+}
+
+/* 押印 */
+function work(x,y){
+  var sheet=R.sheet,pow=tapPower();
+  S.cash+=pow;S.earned+=pow;S.taps++;
+  var r=sheet.getBoundingClientRect();
+  var lx=x==null?r.width/2:x-r.left, ly=y==null?r.height*.6:y-r.top;
+  var marks=sheet.querySelectorAll('.mark');
+  if(marks.length>28)marks[0].remove();
+  var m=document.createElement('span');
+  m.className='mark';m.textContent='承認';
+  m.style.left=lx+'px';m.style.top=ly+'px';
+  m.style.setProperty('--rot',(Math.random()*30-15).toFixed(1)+'deg');
+  sheet.appendChild(m);
+  setTimeout(function(){m.remove();},1000);
+  var f=document.createElement('span');
+  f.className='floater';f.textContent='+¥'+nf.format(pow);
+  f.style.left=lx+'px';f.style.top=(ly-30)+'px';
+  sheet.appendChild(f);
+  setTimeout(function(){f.remove();},800);
+  renderTop();renderWork();renderCards();
+}
+
+/* 売買 */
+function trade(id,side){
+  var d=DEFS.filter(function(x){return x.id===id;})[0],s=S.stocks[id],pr=px(s.price);
+  var q=side==='buy'?buyQty(s):sellQty(s);
+  if(q<=0)return;
+  if(side==='buy'){
+    var total=Math.round(q*pr*10)/10;
+    S.cash-=total;s.cost+=total;s.shares+=q;
+  }else{
+    var avg=s.cost/s.shares;
+    var got=Math.round(q*pr*10)/10;S.cash+=got;S.realized+=got-avg*q;
+    s.cost=Math.max(0,s.cost-avg*q);s.shares-=q;
+    if(s.shares===0)s.cost=0;
+  }
+  if(S.cash<0)S.cash=0;
+  flash(id);
+  renderTop();renderWork();renderCards();
+}
+function buyQty(s){
+  if(s.lock&&s.lock.dir>0)return 0;
+  var pr=px(s.price),afford=Math.floor(S.cash/pr+1e-9);
+  return qtyMode==='max'?afford:Math.min(qtyMode,afford);
+}
+function sellQty(s){
+  if(s.lock&&s.lock.dir<0)return 0;
+  return qtyMode==='max'?s.shares:Math.min(qtyMode,s.shares);
+}
+
+/* 描画 */
+function build(){
+  R.newsEl=$('news');R.sheet=$('sheet');R.cards={};
+  var html='';
+  DEFS.forEach(function(d){
+    html+='<article class="stock" data-id="'+d.id+'">'
+      +'<div class="shead"><div><h3>'+d.name+'</h3><p class="meta">'+d.sector+' ・ <span class="code">'+d.code+'</span></p></div>'
+      +'<div class="pxcol"><div class="price" data-r="price"></div><div class="chg" data-r="chg"></div></div></div>'
+      +'<div class="kindrow"><b>'+KIND[d.id][0]+'</b><span>'+KIND[d.id][1]+'</span></div>'
+      +'<div class="chartmeta"><span class="tf" data-t="name">4秒足</span><span class="legend"><span class="sw s1"></span><span data-t="a">5本(20秒)</span><span class="sw s2"></span><span data-t="b">20本(80秒)</span></span></div>'
+      +'<svg class="spark" data-r="spark" viewBox="0 0 240 96" role="img" aria-label="ロウソク足チャートと移動平均線"></svg>'
+      +'<div class="range"><span data-r="lo"></span><span data-t="span">直近160秒</span><span data-r="hi"></span></div>'
+      +''
+      +'<dl class="hold"><div><dt>保有</dt><dd data-r="sh"></dd></div><div><dt>平均取得単価</dt><dd data-r="avg"></dd></div><div class="pl"><dt>評価損益</dt><dd data-r="pl"></dd></div></dl>'
+      +'<div class="divrow"><div class="divline"><span data-r="divtxt"></span><b data-r="divnext"></b></div><div class="divtrack"><div class="divfill" data-r="divfill"></div></div></div>'
+      +'<div class="act"><button type="button" class="btn" data-act="buy"><span class="bl">買う</span><span class="n bn"></span></button><button type="button" class="btn ghost" data-act="sell"><span class="bl">売る</span><span class="n bn"></span></button></div>'
+      +'</article>';
+  });
+  $('cards').innerHTML=html;
+  DEFS.forEach(function(d){
+    var card=document.querySelector('.stock[data-id="'+d.id+'"]');
+    var g=function(k){return card.querySelector('[data-r="'+k+'"]');};
+    var sp=g('spark');
+    R.cards[d.id]={card:card,price:g('price'),chg:g('chg'),spark:sp,lo:g('lo'),hi:g('hi'),
+      sh:g('sh'),avg:g('avg'),pl:g('pl'),divtxt:g('divtxt'),divnext:g('divnext'),divfill:g('divfill'),
+      buy:card.querySelector('[data-act="buy"]'),sell:card.querySelector('[data-act="sell"]')};
+    var r=R.cards[d.id];
+    r.bl=r.buy.querySelector('.bl');r.bn=r.buy.querySelector('.bn');r.sl=r.sell.querySelector('.bl');r.sn=r.sell.querySelector('.bn');
+  });
+}
+
+function drawCandles(r,s){
+  var W=240,H=96,pt=5,pb=5,i,sr=s.ser[S.tf],cs=sr.candles.concat([sr.cur]);
+  if(cs.length>CMAX)cs=cs.slice(cs.length-CMAX);
+  var mn=Infinity,mx=-Infinity;
+  cs.forEach(function(c){if(c.l<mn)mn=c.l;if(c.h>mx)mx=c.h;});
+  r.lo.textContent='安 ¥'+fmtPx(mn);r.hi.textContent='高 ¥'+fmtPx(mx);
+  var pad=(mx-mn)*.08||mx*.01,lo=mn-pad,hi=mx+pad;
+  var yv=function(v){return pt+(hi-v)/(hi-lo)*(H-pt-pb);};
+  var slot=W/CMAX,bw=slot*.62,off=(CMAX-cs.length)*slot,out='';
+  for(i=1;i<4;i++){var gy=(H*i/4).toFixed(1);out+='<line class="grid" x1="0" x2="'+W+'" y1="'+gy+'" y2="'+gy+'"/>';}
+  cs.forEach(function(c,j){
+    var x=off+j*slot+slot/2,cls=c.c>=c.o?'up':'dn',a=yv(c.o),b=yv(c.c);
+    out+='<line class="w '+cls+'" x1="'+x.toFixed(1)+'" x2="'+x.toFixed(1)+'" y1="'+yv(c.h).toFixed(1)+'" y2="'+yv(c.l).toFixed(1)+'"/>'
+      +'<rect class="'+cls+'" x="'+(x-bw/2).toFixed(1)+'" y="'+Math.min(a,b).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(1,Math.abs(a-b)).toFixed(1)+'"/>';
+  });
+  if(S.showMA){
+    [[5,'ma1'],[20,'ma2']].forEach(function(m){
+      var p=m[0],pts=[];
+      for(var j=p-1;j<cs.length;j++){
+        var sum=0;
+        for(var k=j-p+1;k<=j;k++)sum+=cs[k].c;
+        pts.push((off+j*slot+slot/2).toFixed(1)+' '+yv(sum/p).toFixed(1));
+      }
+      if(pts.length>1)out+='<path class="'+m[1]+'" d="M'+pts.join(' L')+'"/>';
+    });
+  }
+  var ly=yv(s.price).toFixed(1);
+  out+='<line class="last" x1="0" x2="'+W+'" y1="'+ly+'" y2="'+ly+'"/>';
+  r.spark.innerHTML=out;
+}
+
+function renderTop(){
+  var t=totals();
+  $('assets').textContent='¥'+big(t.assets);
+  $('s-cash').textContent='¥'+big(S.cash);
+  $('s-stock').textContent='¥'+big(t.stock);
+  $('s-div').textContent='¥'+big(S.divTotal);
+  setPL('s-unreal',t.unreal);setPL('s-real',S.realized);setPL('s-pl',t.pl);
+  var up=rankOf(t.assets);
+  if(up>S.rank){S.rank=up;toast(up===RANKS.length-1?'億り人を達成しました':'昇進しました：'+RANKS[up].name+'（役職手当 ×'+RANKS[up].mult.toFixed(2)+'）');}
+  var ri=S.rank,cur=RANKS[ri],nxt=RANKS[ri+1],pct;
+  $('sheet-who').textContent='起案者　'+cur.name;
+  $('allow').textContent='手当 ×'+cur.mult.toFixed(2);
+  $('rank').textContent=cur.name;
+  if(nxt){
+    pct=(t.assets-cur.at)/(nxt.at-cur.at)*100;
+    $('nextrank').textContent='次の役職「'+nxt.name+'」まで あと ¥'+big(nxt.at-t.assets);
+  }else{
+    pct=100;
+    $('nextrank').textContent='最高位です。資産は増やし放題です';
+  }
+  pct=clamp(pct,0,100);
+  $('rankfill').style.width=pct.toFixed(1)+'%';
+  $('rankbar').setAttribute('aria-valuenow',String(Math.round(pct)));
+}
+
+var SHIRT=['#4a6fa5','#6a9a7c','#c07a3a','#8a6fb5','#c0485a','#3f8f9a'];
+var HAIR=['#2a2a2a','#6b4226','#c9a04a','#3a2a4a'];
+var SKIN='#f1c9a5';
+var DESK='<rect class="desk" x="2" y="44" width="44" height="5" rx="1"/><rect class="desk" x="6" y="49" width="3" height="7"/><rect class="desk" x="39" y="49" width="3" height="7"/>';
+function workerSvg(i,full){
+  var sh=full?'#2f3b52':SHIRT[i%SHIRT.length],hr=HAIR[(i*5+2)%HAIR.length],dl=(((i*37)%100)/100*1.2).toFixed(2);
+  return '<svg class="slot" viewBox="0 0 48 56" style="--d:-'+dl+'s">'
+    +'<path d="M12 46V36Q12 28 20 28H28Q36 28 36 36V46Z" fill="'+sh+'"/>'
+    +'<path d="M13 33L16 43M35 33L32 43" stroke="'+sh+'" stroke-width="4" stroke-linecap="round" fill="none"/>'
+    +(full?'<path d="M20 28L24 34L28 28Z" fill="#fff"/><path d="M24 33L22.6 36L24 42L25.4 36Z" fill="#cf3a1b"/>':'')+'<g class="head"><circle cx="24" cy="18" r="7.5" fill="'+SKIN+'"/>'
+    +'<path d="M16.5 17Q16.5 9.5 24 9.5Q31.5 9.5 31.5 17Q28 13.5 24 13.5Q20 13.5 16.5 17Z" fill="'+hr+'"/>'
+    +'<circle cx="21.5" cy="19.5" r=".9" fill="#2a2a2a"/><circle cx="26.5" cy="19.5" r=".9" fill="#2a2a2a"/></g>'
+    +'<rect class="lap" x="17" y="37" width="14" height="7" rx="1"/>'
+    +'<circle class="hand" cx="16" cy="43" r="2.6" fill="'+SKIN+'"/><circle class="hand b" cx="32" cy="43" r="2.6" fill="'+SKIN+'"/>'
+    +DESK+'<g class="coin"><text x="35" y="10" font-size="9" font-weight="700">¥</text></g></svg>';
+}
+function emptySvg(){
+  return '<svg class="slot empty" viewBox="0 0 48 56"><rect class="lap" x="17" y="37" width="14" height="7" rx="1"/>'+DESK+'</svg>';
+}
+function renderOffice(){
+  var key=S.partLv+':'+S.fullLv;
+  if(key===lastOffice)return;
+  lastOffice=key;
+  var p=S.partLv,f=S.fullLv,n=p+f,h='';
+  for(var i=0;i<12;i++)h+=i<f?workerSvg(i,true):(i<n?workerSvg(i,false):emptySvg());
+  $('floor').innerHTML=h;
+  $('office-n').textContent='アルバイト '+nf.format(p)+'人 ・ 正社員 '+nf.format(f)+'人';
+  $('office-x').textContent=n===0?'雇うとここで働きます':(n>12?'ほか'+nf.format(n-12)+'人が在宅勤務':'');
+}
+function renderWork(){
+  renderOffice();
+  var p=tapPower(),pr=partRate();
+  $('pay').textContent='+¥'+nf.format(p);
+  $('sheet-no').textContent='第'+nf.format(S.taps+1)+'号';
+  $('rate').textContent='1押印 ¥'+nf.format(p)+' ・ 自動 ¥'+nf.format(Math.round(pr))+'/秒';
+  $('taps').textContent=nf.format(S.taps);
+  $('earned').textContent='¥'+big(S.earned);
+  $('tap-lv').textContent='Lv.'+S.tapLv;
+  $('tap-desc').textContent='1押印 ¥'+nf.format(p)+' → ¥'+nf.format(tapPowerAt(S.tapLv+1));
+  $('part-lv').textContent=nf.format(S.partLv)+'人';
+  $('full-lv').textContent=nf.format(S.fullLv)+'人';
+  $('part-desc').textContent='毎秒 ¥'+nf.format(Math.round(pr))+' → ¥'+nf.format(Math.round(rateAt(S.partLv+1,S.fullLv)));
+  var tc=tapCost(),pc=partCost();
+  $('tap-cost').textContent='¥'+big(tc);
+  $('part-cost').textContent='¥'+big(pc);
+  $('tap-buy').disabled=S.cash<tc;
+  $('part-buy').disabled=S.cash<pc;
+  var fc=fullCost();
+  $('full-desc').textContent=S.partLv>0?'バイト→正社員 毎秒 +¥'+nf.format(Math.round(34*mult())):'先にアルバイトを雇おう';
+  $('full-cost').textContent='¥'+big(fc);
+  $('full-buy').disabled=S.cash<fc||S.partLv<1;
+}
+
+function buildHold(){
+  var h='';
+  DEFS.forEach(function(d){h+='<tr><td>'+d.name+'</td><td></td><td></td><td></td><td></td><td></td></tr>';});
+  h+='<tr class="sum"><td>合計</td><td></td><td></td><td></td><td></td><td></td></tr>';
+  $('holdbody').innerHTML=h;
+  R.rows=Array.prototype.map.call($('holdbody').rows,function(tr){return tr;});
+}
+function plCls(v){return Math.abs(v)<.05?'':(v>0?'pos':'neg');}
+function pctTxt(v){return (v>=0?'+':'−')+Math.abs(v).toFixed(2)+'%';}
+function fillRow(tr,sh,cost,val){
+  var c=tr.cells;
+  if(sh>0){
+    var pl=val-cost,r=cost>0?pl/cost*100:0,k=plCls(pl);
+    c[1].textContent=nf.format(sh)+'株';
+    c[2].textContent='¥'+money(cost);
+    c[3].textContent='¥'+money(val);
+    c[4].textContent=signed(pl);c[4].className=k;
+    c[5].textContent=pctTxt(r);c[5].className=k;
+    tr.className=tr.className.replace(' idle','').replace('idle','');
+  }else{
+    for(var i=1;i<6;i++){c[i].textContent='—';c[i].className='';}
+    if(tr.className.indexOf('idle')<0)tr.className=(tr.className+' idle').replace(/^ /,'');
+  }
+}
+function renderDiv(){
+  var nx=0;
+  DEFS.forEach(function(d){var q=S.stocks[d.id];if(q.dps>0)nx+=q.shares*q.dps*(perkOn('taiyo')?1.1:1);});
+  $('d-total').textContent='¥'+money(S.divTotal);
+  $('d-next').textContent='¥'+money(nx);
+  if(!divDirty)return;
+  divDirty=false;
+  var h='';
+  S.divLog.forEach(function(e){h+='<li><time>'+esc(e.t)+'</time><span class="nm">'+esc(e.n)+' ・ '+nf.format(e.sh)+'株 × ¥'+e.dps.toFixed(2)+'</span><span class="amt">+¥'+money(e.amt)+'</span></li>';});
+  if(!h)h='<li class="empty">配当を出す銘柄を持つと、配当日ごとにここへ記録されます</li>';
+  $('divlog').innerHTML=h;
+}
+function buildPerks(){
+  var h='';
+  DEFS.forEach(function(d){
+    var k=PERK[d.id];
+    h+='<div class="perk" data-id="'+d.id+'"><div class="badge" aria-hidden="true">'+k.badge+'</div>'
+      +'<div class="pn"><span>'+k.name+'</span><span class="st"></span></div>'
+      +'<div class="pe">'+k.desc+'</div>'
+      +'<div class="pt"></div><div class="pbar"><div class="pfill"></div></div></div>';
+  });
+  $('perks').innerHTML=h;
+  R.perks={};
+  DEFS.forEach(function(d){
+    var c=document.querySelector('.perk[data-id="'+d.id+'"]');
+    R.perks[d.id]={card:c,st:c.querySelector('.st'),pt:c.querySelector('.pt'),fill:c.querySelector('.pfill'),on:null};
+  });
+}
+function renderPerks(){
+  DEFS.forEach(function(d){
+    var k=PERK[d.id],q=S.stocks[d.id],on=q.shares>=k.need,r=R.perks[d.id];
+    if(r.on!==null&&on!==r.on)toast(on?'優待ゲット：'+k.name:'優待が失効：'+k.name);
+    r.on=on;
+    r.card.classList.toggle('on',on);
+    r.st.textContent=on?'有効':'あと'+nf.format(k.need-q.shares)+'株';
+    r.pt.textContent=d.name+' '+nf.format(q.shares)+'/'+nf.format(k.need)+'株';
+    r.fill.style.width=clamp(q.shares/k.need*100,0,100).toFixed(1)+'%';
+  });
+}
+function renderHold(){
+  var tsh=0,tc=0,tv=0;
+  DEFS.forEach(function(d,i){
+    var s=S.stocks[d.id],v=s.shares*px(s.price);
+    fillRow(R.rows[i],s.shares,s.cost,v);
+    tsh+=s.shares;tc+=s.cost;tv+=v;
+  });
+  var sum=R.rows[DEFS.length];
+  fillRow(sum,tsh,tc,tv);
+  sum.className='sum';
+}
+function fmtDur(sec){return sec<180?sec+'秒':(sec%60?'約':'')+Math.round(sec/60)+'分';}
+function renderTf(){
+  var per=TF[S.tf].per;
+  var set=function(k,v){Array.prototype.forEach.call(document.querySelectorAll('[data-t="'+k+'"]'),function(e){e.textContent=v;});};
+  set('name',TF[S.tf].name);set('a','5本('+fmtDur(per*5)+')');set('b','20本('+fmtDur(per*20)+')');set('span','直近'+fmtDur(per*CMAX));
+  Array.prototype.forEach.call(document.querySelectorAll('#tfseg button'),function(b){b.setAttribute('aria-pressed',String(parseInt(b.getAttribute('data-tf'),10)===S.tf));});
+}
+function renderCards(){
+  DEFS.forEach(function(d){
+    var s=S.stocks[d.id],r=R.cards[d.id],pr=px(s.price);
+    if(dirty){
+      r.price.textContent='¥'+fmtPx(s.price);
+      var sr=s.ser[S.tf],base=(sr.candles[0]||sr.cur).o,ch=(s.price/base-1)*100,pos=ch>=0;
+      r.chg.textContent=(pos?'▲ +':'▼ −')+Math.abs(ch).toFixed(2)+'%';
+      r.chg.className='chg '+(pos?'pos':'neg');
+      if(s.lock){r.chg.textContent=s.lock.dir>0?'▲ ストップ高':'▼ ストップ安';r.chg.className='chg '+(s.lock.dir>0?'pos':'neg');}
+      r.card.classList.toggle('lim-up',!!(s.lock&&s.lock.dir>0));
+      r.card.classList.toggle('lim-dn',!!(s.lock&&s.lock.dir<0));
+      drawCandles(r,s);
+    }
+    r.sh.textContent=nf.format(s.shares)+'株';
+    if(s.shares>0){
+      var avg=s.cost/s.shares,pl=s.shares*pr-s.cost,pp=s.cost>0?pl/s.cost*100:0;
+      r.avg.textContent='¥'+fmtPx(avg);
+      r.pl.textContent=signed(pl)+' ('+(pp>=0?'+':'−')+Math.abs(pp).toFixed(1)+'%)';
+      r.pl.className=Math.abs(pl)<0.05?'':(pl>0?'pos':'neg');
+    }else{
+      r.avg.textContent='—';r.pl.textContent='—';r.pl.className='';
+    }
+    if(s.dps>0){
+      r.divtxt.textContent='配当 ¥'+s.dps.toFixed(2)+'/株 ・ 利回り '+(s.dps/pr*100).toFixed(2)+'%';
+      r.divnext.textContent='あと'+Math.ceil(s.divT)+'秒'+(s.shares>0?'（+¥'+money(s.shares*s.dps)+'）':'');
+      r.divfill.style.width=clamp((1-s.divT/d.every)*100,0,100).toFixed(1)+'%';
+    }else{
+      r.divtxt.textContent='無配（利益を成長に再投資）';
+      r.divnext.textContent='';
+      r.divfill.style.width='0%';
+    }
+    var bq=buyQty(s),sq=sellQty(s);
+    r.bl.textContent=s.lock&&s.lock.dir>0?'買えません':'買う';r.bn.textContent=bq>0?' '+nf.format(bq)+'株':'';
+    r.sl.textContent=s.lock&&s.lock.dir<0?'売れません':'売る';r.sn.textContent=sq>0?' '+nf.format(sq)+'株':'';
+    r.buy.disabled=bq<=0;
+    r.sell.disabled=sq<=0;
+  });
+  renderHold();
+  renderDiv();
+  renderPerks();
+  dirty=false;
+}
+
+function frame(){
+  var now=Date.now(),dt=clamp((now-last)/1000,0,10);last=now;
+  var rate=partRate();
+  if(rate){S.cash+=rate*dt;S.earned+=rate*dt;}
+  if(perkOn('hokuto'))S.cash+=Math.min(S.cash*.0002,200)*dt;
+  lotT-=dt;
+  if(lotT<=0){
+    lotT+=40;
+    if(perkOn('sora')&&Math.random()<.25){
+      var bn=Math.round(Math.max(500,totals().assets*.015));
+      S.cash+=bn;
+      addNews('up','【優待】宇宙旅行の抽選に当選！賞金 ¥'+big(bn));
+      toast('宇宙旅行に当選：賞金 ¥'+big(bn));
+    }
+  }
+  acc+=dt;var n=0;
+  while(acc>=1&&n<10){acc-=1;n++;tick();}
+  dividends(dt);
+  evT-=dt;
+  if(evT<=0){fireEvent();evT=18+Math.random()*17;}
+  renderTop();renderWork();renderCards();
+}
+
+/* 入力 */
+function bind(){
+  var sheet=R.sheet;
+  sheet.addEventListener('pointerdown',function(e){
+    if(e.pointerType==='mouse'&&e.button!==0)return;
+    e.preventDefault();work(e.clientX,e.clientY);
+  });
+  sheet.addEventListener('keydown',function(e){
+    if((e.key===' '||e.key==='Enter')&&!e.repeat){e.preventDefault();work(null,null);}
+  });
+  sheet.addEventListener('contextmenu',function(e){e.preventDefault();});
+  $('cards').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-act]');
+    if(!b||b.disabled)return;
+    trade(b.closest('.stock').getAttribute('data-id'),b.getAttribute('data-act'));
+  });
+  document.querySelector('.qty .seg').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-q]');
+    if(!b)return;
+    var q=b.getAttribute('data-q');
+    qtyMode=q==='max'?'max':parseInt(q,10);
+    Array.prototype.forEach.call(this.querySelectorAll('button'),function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    renderCards();
+  });
+  $('tap-buy').addEventListener('click',function(){
+    var c=tapCost();if(S.cash<c)return;S.cash-=c;S.tapLv++;renderTop();renderWork();renderCards();
+  });
+  $('part-buy').addEventListener('click',function(){
+    var c=partCost();if(S.cash<c)return;S.cash-=c;S.partLv++;renderTop();renderWork();renderCards();
+  });
+  $('full-buy').addEventListener('click',function(){
+    var c=fullCost();if(S.cash<c||S.partLv<1)return;S.cash-=c;S.partLv--;S.fullLv++;renderTop();renderWork();renderCards();
+    toast('正社員に登用しました');
+  });
+  var armed=false,rb=$('reset');
+  rb.addEventListener('click',function(){
+    if(!armed){
+      armed=true;rb.textContent='本当にやり直す？ もう一度押すと全データを削除します';
+      setTimeout(function(){armed=false;rb.textContent='最初からやり直す';},4000);
+      return;
+    }
+    armed=false;rb.textContent='最初からやり直す';
+    try{localStorage.removeItem(KEY);}catch(e){}
+    initState(true);lastOffice=-1;$('ma-toggle').setAttribute('aria-pressed','true');$('cards').classList.remove('noma');renderTf();dirty=true;renderNews();renderTop();renderWork();renderCards();
+    toast('最初からやり直します');
+  });
+  $('tfseg').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-tf]');
+    if(!b)return;
+    S.tf=parseInt(b.getAttribute('data-tf'),10);
+    renderTf();dirty=true;renderCards();
+  });
+  var mb=$('ma-toggle');
+  mb.setAttribute('aria-pressed',S.showMA?'true':'false');
+  $('cards').classList.toggle('noma',!S.showMA);
+  mb.addEventListener('click',function(){
+    S.showMA=!S.showMA;
+    mb.setAttribute('aria-pressed',S.showMA?'true':'false');
+    $('cards').classList.toggle('noma',!S.showMA);
+    DEFS.forEach(function(d){drawCandles(R.cards[d.id],S.stocks[d.id]);});
+  });
+  window.addEventListener('pagehide',save);
+  document.addEventListener('visibilitychange',function(){if(document.hidden)save();});
+}
+
+initState(false);
+build();
+buildHold();
+buildPerks();
+bind();
+renderTf();
+renderNews();renderTop();renderWork();renderCards();
+function setHH(){document.documentElement.style.setProperty('--hh',$('topbar').offsetHeight+'px');}
+setHH();
+window.addEventListener('resize',setHH);
+if(window.ResizeObserver)new ResizeObserver(setHH).observe($('topbar'));
+setInterval(frame,250);
+setInterval(save,5000);
+})();
+</script>
+
+</body></html>
